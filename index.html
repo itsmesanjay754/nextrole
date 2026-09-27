@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NextRole — Find your next role, faster</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0F1A2B; --navy-2:#16233A; --paper:#F6F7F9; --ink:#0F1A2B;
+  --slate:#5B6B7C; --line:#DCE1E7; --teal:#0E8F6F; --teal-dark:#0B6E56;
+  --gold:#B8862E; --white:#FFFFFF;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ --paper:#0F1A2B; --ink:#EDEFF2; --slate:#9AA7B5; --line:#26344A; --white:#16233A; --navy-2:#0B1424; }
+}
+:root[data-theme="dark"]{ --paper:#0F1A2B; --ink:#EDEFF2; --slate:#9AA7B5; --line:#26344A; --white:#16233A; --navy-2:#0B1424; }
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:border-box;}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+.wrap{max-width:920px;margin:0 auto;padding:0 20px;}
+
+/* Header */
+header{background:var(--navy);color:#fff;padding:16px 0;}
+header .wrap{display:flex;align-items:center;justify-content:space-between;}
+.brand{font-family:'Fraunces',serif;font-size:22px;font-weight:600;letter-spacing:-0.01em;color:#fff;}
+.brand span{color:var(--teal);}
+.tagline{font-size:13px;color:#AEB9C6;margin-top:2px;}
+
+/* Hero / search */
+.hero{padding:52px 0 28px;text-align:center;}
+.hero h1{font-family:'Fraunces',serif;font-size:34px;line-height:1.15;font-weight:600;margin:0 0 10px;max-width:560px;margin-left:auto;margin-right:auto;}
+.hero p{color:var(--slate);font-size:15px;margin:0 0 28px;}
+
+.searchbar{display:flex;gap:8px;max-width:640px;margin:0 auto 14px;}
+.searchbar input{flex:1;padding:14px 16px;border:1.5px solid var(--line);border-radius:8px;font-size:15px;background:var(--white);color:var(--ink);}
+.searchbar input:focus{outline:2px solid var(--teal);outline-offset:1px;border-color:var(--teal);}
+.btn{border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;padding:14px 20px;font-family:inherit;}
+.btn-primary{background:var(--teal);color:#fff;}
+.btn-primary:hover{background:var(--teal-dark);}
+.btn-primary:focus-visible, .btn-ghost:focus-visible, .btn-apply:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+.upload-row{display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:6px;}
+.upload-btn{background:var(--navy);color:#fff;padding:14px 24px;border-radius:8px;font-weight:600;font-size:14.5px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:9px;}
+.upload-btn:hover{background:var(--navy-2);}
+.upload-btn .icon{width:16px;height:16px;border:2px solid #fff;border-bottom:none;border-radius:2px 2px 0 0;position:relative;flex:none;}
+.upload-btn .icon::after{content:"";position:absolute;left:50%;bottom:-2px;width:2px;height:10px;background:#fff;transform:translateX(-50%);}
+.upload-note{font-size:12.5px;color:var(--slate);margin-top:8px;}
+#resumeInput{display:none;}
+
+.analysis{max-width:640px;margin:22px auto 0;border:1.5px solid var(--line);border-radius:10px;padding:16px 18px;background:var(--white);text-align:left;display:none;}
+.analysis.show{display:block;}
+.analysis h3{margin:0 0 8px;font-size:14px;}
+.chips{display:flex;flex-wrap:wrap;gap:6px;}
+.chip{background:rgba(14,143,111,0.12);color:var(--teal-dark);border-radius:6px;padding:5px 10px;font-size:12.5px;font-weight:600;}
+
+/* Filters */
+.filters{border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:16px 0;position:sticky;top:0;background:var(--paper);z-index:5;}
+.filters .wrap{display:flex;flex-wrap:wrap;gap:10px;align-items:center;}
+.filters select, .filters .toggle, .filters label.check{
+  border:1.5px solid var(--line);border-radius:7px;padding:9px 12px;font-size:13.5px;background:var(--white);color:var(--ink);font-family:inherit;
+}
+.filters select{cursor:pointer;}
+.filters label.check{display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;}
+.filters label.check input{accent-color:var(--teal);}
+.result-count{margin-left:auto;font-size:13px;color:var(--slate);}
+
+/* Results */
+.results{padding:22px 0 60px;}
+.job{border-bottom:1px solid var(--line);padding:22px 4px;display:flex;justify-content:space-between;gap:18px;}
+.job-main{flex:1;min-width:0;}
+.job-title{font-size:16.5px;font-weight:700;margin:0 0 3px;}
+.job-company{color:var(--slate);font-size:13.5px;margin:0 0 10px;}
+.job-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px;}
+.tag{font-size:12px;border:1px solid var(--line);border-radius:6px;padding:4px 9px;color:var(--slate);}
+.tag.remote{color:var(--teal-dark);border-color:rgba(14,143,111,0.4);}
+.tag.visa{color:var(--gold);border-color:rgba(184,134,46,0.4);}
+.job-desc{font-size:13.5px;color:var(--slate);margin:0;max-width:60ch;}
+.job-side{flex:none;display:flex;flex-direction:column;align-items:flex-end;gap:8px;min-width:120px;}
+.salary{font-weight:700;font-size:14.5px;white-space:nowrap;}
+.btn-apply{background:var(--white);border:1.5px solid var(--navy);color:var(--navy);padding:10px 18px;border-radius:7px;font-weight:600;font-size:13.5px;white-space:nowrap;}
+.btn-apply:hover{background:var(--navy);color:#fff;}
+.match{font-size:11.5px;color:var(--teal-dark);font-weight:600;}
+.empty{text-align:center;color:var(--slate);padding:50px 0;font-size:14px;}
+
+.compat-badge{font-size:12px;font-weight:700;border-radius:6px;padding:4px 9px;white-space:nowrap;}
+.compat-badge.high{background:rgba(14,143,111,0.15);color:var(--teal-dark);}
+.compat-badge.mid{background:rgba(184,134,46,0.15);color:var(--gold);}
+.compat-badge.low{background:rgba(91,107,124,0.15);color:var(--slate);}
+.compat-hint{font-size:11.5px;color:var(--slate);text-align:right;max-width:120px;}
+.hm-line{font-size:12px;color:var(--slate);margin:2px 0 0;}
+.hm-line a{color:var(--teal-dark);text-decoration:none;font-weight:600;}
+.hm-line a:hover{text-decoration:underline;}
+.job-actions{display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;}
+.btn-mini{border:1.5px solid var(--line);background:var(--white);color:var(--ink);border-radius:7px;padding:8px 12px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;}
+.btn-mini:hover{border-color:var(--navy);}
+.btn-mini:disabled{opacity:0.45;cursor:not-allowed;}
+.btn-mini.tailor{border-color:var(--teal);color:var(--teal-dark);}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(15,26,43,0.55);z-index:50;align-items:flex-start;justify-content:center;padding:40px 16px calc(40px + env(safe-area-inset-bottom,0px));overflow-y:auto;}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--white);color:var(--ink);border-radius:12px;max-width:560px;width:100%;padding:26px;position:relative;box-shadow:0 20px 50px rgba(0,0,0,0.25);}
+.modal-close{position:absolute;top:14px;right:14px;border:none;background:transparent;font-size:20px;line-height:1;cursor:pointer;color:var(--slate);}
+.modal h2{font-family:'Fraunces',serif;font-size:20px;margin:0 0 4px;}
+.modal .modal-sub{color:var(--slate);font-size:13px;margin:0 0 16px;}
+.modal-body{font-size:13.5px;line-height:1.65;white-space:pre-wrap;}
+.modal-body strong{color:var(--ink);}
+
+footer{border-top:1px solid var(--line);padding:20px 0;text-align:center;color:var(--slate);font-size:12.5px;}
+
+@media (max-width:560px){
+  .job{flex-direction:column;}
+  .job-side{align-items:flex-start;flex-direction:row;justify-content:space-between;width:100%;}
+  .hero h1{font-size:27px;}
+  .filters{position:static;}
+  .result-count{width:100%;margin-left:0;order:99;}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div>
+      <div class="brand">Next<span>Role</span></div>
+      <div class="tagline">One search, every job portal</div>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <h1>Your resume already knows what you're good at. Let it do the searching.</h1>
+    <p>Upload it once — NextRole reads your skills and surfaces matching roles from portals worldwide.</p>
+
+    <div class="upload-row">
+      <button class="upload-btn" id="uploadBtn"><span class="icon"></span>Upload your resume</button>
+    </div>
+    <div class="upload-note">PDF or Word, under 10MB. Used only to match you to roles.</div>
+    <input type="file" id="resumeInput" accept=".pdf,.doc,.docx">
+
+    <div class="analysis" id="analysisBox">
+      <h3 id="analysisTitle">Reading your resume…</h3>
+      <div class="chips" id="chips"></div>
+    </div>
+
+    <div class="searchbar" style="margin-top:26px;">
+      <input type="text" id="searchInput" placeholder="Job title, company, or keyword">
+      <button class="btn btn-primary" id="searchBtn">Search</button>
+    </div>
+  </div>
+</section>
+
+<div class="filters">
+  <div class="wrap">
+    <select id="fRegion">
+      <option value="">Any region</option>
+      <option>North America</option>
+      <option>Europe</option>
+      <option>Asia Pacific</option>
+      <option>Middle East</option>
+      <option>Africa</option>
+      <option>South America</option>
+      <option>Oceania</option>
+    </select>
+    <select id="fLocation">
+      <option value="">Any country</option>
+      <option>United States</option>
+      <option>Canada</option>
+      <option>Mexico</option>
+      <option>United Kingdom</option>
+      <option>Germany</option>
+      <option>France</option>
+      <option>Netherlands</option>
+      <option>Ireland</option>
+      <option>India</option>
+      <option>Singapore</option>
+      <option>Japan</option>
+      <option>Hong Kong</option>
+      <option>United Arab Emirates</option>
+      <option>Saudi Arabia</option>
+      <option>South Africa</option>
+      <option>Nigeria</option>
+      <option>Brazil</option>
+      <option>Australia</option>
+      <option>New Zealand</option>
+    </select>
+    <select id="fArrangement">
+      <option value="">Remote or onsite</option>
+      <option value="Remote">Remote</option>
+      <option value="Hybrid">Hybrid</option>
+      <option value="Onsite">Onsite</option>
+    </select>
+    <select id="fSalary">
+      <option value="0">Any salary</option>
+      <option value="80000">$80k+</option>
+      <option value="120000">$120k+</option>
+      <option value="160000">$160k+</option>
+      <option value="200000">$200k+</option>
+    </select>
+    <select id="fCurrency">
+      <option value="USD">USD $</option>
+      <option value="EUR">EUR €</option>
+      <option value="GBP">GBP £</option>
+      <option value="INR">INR ₹</option>
+      <option value="SGD">SGD S$</option>
+      <option value="CAD">CAD C$</option>
+      <option value="AED">AED د.إ</option>
+      <option value="AUD">AUD A$</option>
+      <option value="JPY">JPY ¥</option>
+      <option value="BRL">BRL R$</option>
+      <option value="ZAR">ZAR R</option>
+      <option value="MXN">MXN Mex$</option>
+    </select>
+    <label class="check"><input type="checkbox" id="fVisa"> Visa sponsorship</label>
+    <span class="result-count" id="resultCount"></span>
+  </div>
+</div>
+
+<section class="results">
+  <div class="wrap" id="jobList"></div>
+</section>
+
+<footer>NextRole aggregates listings from partner job portals for demonstration. © 2026 NextRole.</footer>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <button class="modal-close" id="modalClose" aria-label="Close">×</button>
+    <div id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+const jobs = [
+  {title:"Senior Backend Engineer", company:"Meridian Systems", location:"United States", region:"North America", arrangement:"Remote", salary:185000, visa:true, skills:["Python","Distributed Systems","AWS"], desc:"Own core payment infrastructure serving 40M requests a day."},
+  {title:"Product Designer", company:"Bluewave Studio", location:"United Kingdom", region:"Europe", arrangement:"Hybrid", salary:95000, visa:false, skills:["Figma","Design Systems","Research"], desc:"Shape the design language for a fintech used across Europe."},
+  {title:"Machine Learning Engineer", company:"Solvent AI", location:"Singapore", region:"Asia Pacific", arrangement:"Onsite", salary:170000, visa:true, skills:["PyTorch","MLOps","Python"], desc:"Build recommendation models for a regional marketplace."},
+  {title:"Data Analyst", company:"Harborlight Retail", location:"Canada", region:"North America", arrangement:"Hybrid", salary:78000, visa:false, skills:["SQL","Tableau","Excel"], desc:"Turn store-level sales data into weekly merchandising decisions."},
+  {title:"DevOps Engineer", company:"Northgate Cloud", location:"Germany", region:"Europe", arrangement:"Remote", salary:130000, visa:true, skills:["Kubernetes","Terraform","AWS"], desc:"Run infrastructure for a multi-region SaaS platform."},
+  {title:"Frontend Engineer", company:"Fernwood Health", location:"United States", region:"North America", arrangement:"Remote", salary:145000, visa:false, skills:["React","TypeScript","Accessibility"], desc:"Build patient-facing tools used by 2M households."},
+  {title:"Engineering Manager", company:"Cobalt Robotics", location:"United States", region:"North America", arrangement:"Onsite", salary:210000, visa:true, skills:["Leadership","Python","Systems Design"], desc:"Lead a 9-person team shipping perception software for warehouse robots."},
+  {title:"HR Business Partner", company:"Anchorline Group", location:"India", region:"Asia Pacific", arrangement:"Hybrid", salary:60000, visa:false, skills:["HRIS","Employee Relations","Compliance"], desc:"Support a 400-person engineering org through a period of rapid growth."},
+  {title:"Cybersecurity Analyst", company:"Fortress Point", location:"United Kingdom", region:"Europe", arrangement:"Remote", salary:110000, visa:true, skills:["SIEM","Incident Response","Python"], desc:"Monitor and respond to threats across a global banking network."},
+  {title:"Marketing Manager", company:"Lumen & Co", location:"Canada", region:"North America", arrangement:"Onsite", salary:88000, visa:false, skills:["Campaign Strategy","SEO","Analytics"], desc:"Drive demand generation for a growing B2B design tool."},
+  {title:"Customer Success Manager", company:"Vaso Retail", location:"Mexico", region:"North America", arrangement:"Hybrid", salary:45000, visa:false, skills:["Account Management","Spanish","CRM"], desc:"Own renewals and onboarding for the Latin America customer base."},
+  {title:"Backend Developer", company:"Kanaal Fintech", location:"Netherlands", region:"Europe", arrangement:"Hybrid", salary:85000, visa:true, skills:["Java","Kubernetes","SQL"], desc:"Build core ledger services for a pan-European payments app."},
+  {title:"Data Engineer", company:"Seine Analytics", location:"France", region:"Europe", arrangement:"Onsite", salary:78000, visa:false, skills:["SQL","Python","Airflow"], desc:"Build pipelines feeding real-time retail dashboards."},
+  {title:"Compliance Officer", company:"Emerald Trust", location:"Ireland", region:"Europe", arrangement:"Remote", salary:72000, visa:true, skills:["Compliance","Risk","Communication"], desc:"Support regulatory filings for a growing asset manager."},
+  {title:"Software Engineer", company:"Sakura Systems", location:"Japan", region:"Asia Pacific", arrangement:"Onsite", salary:95000, visa:true, skills:["Java","React","AWS"], desc:"Build point-of-sale software used across 3,000 stores."},
+  {title:"Investment Analyst", company:"Victoria Capital", location:"Hong Kong", region:"Asia Pacific", arrangement:"Onsite", salary:110000, visa:false, skills:["Financial Modeling","Excel","Communication"], desc:"Support due diligence for a regional private equity desk."},
+  {title:"Solutions Architect", company:"Dunes Technology", location:"United Arab Emirates", region:"Middle East", arrangement:"Onsite", salary:135000, visa:true, skills:["AWS","Systems Design","Leadership"], desc:"Design cloud architecture for government digitization projects."},
+  {title:"Project Manager", company:"Falcon Infrastructure", location:"Saudi Arabia", region:"Middle East", arrangement:"Onsite", salary:130000, visa:true, skills:["Project Management","Stakeholder Management","Risk"], desc:"Deliver a national logistics infrastructure programme."},
+  {title:"Financial Analyst", company:"Table Bay Holdings", location:"South Africa", region:"Africa", arrangement:"Hybrid", salary:52000, visa:false, skills:["Excel","Financial Modeling","SQL"], desc:"Support investment reporting for a diversified holding company."},
+  {title:"Product Manager", company:"Lagoon Mobile", location:"Nigeria", region:"Africa", arrangement:"Remote", salary:48000, visa:false, skills:["Product Management","Analytics","Communication"], desc:"Lead the roadmap for a mobile money product used by millions."},
+  {title:"Data Scientist", company:"Ipê Labs", location:"Brazil", region:"South America", arrangement:"Remote", salary:70000, visa:false, skills:["Python","PyTorch","SQL"], desc:"Build churn and pricing models for a regional marketplace."},
+  {title:"Site Reliability Engineer", company:"Harbourline Digital", location:"Australia", region:"Oceania", arrangement:"Hybrid", salary:145000, visa:true, skills:["Kubernetes","Terraform","Python"], desc:"Keep a national retail platform online through peak sales events."},
+  {title:"UX Researcher", company:"Kōwhai Health", location:"New Zealand", region:"Oceania", arrangement:"Remote", salary:92000, visa:false, skills:["Research","Figma","Communication"], desc:"Study patient journeys for a national telehealth service."}
+];
+
+jobs.forEach((j,i)=> j.id = i);
+
+let matchedSkills = [];
+
+const hiringManagers = [
+  {name:"Priya Nandan", title:"Talent Partner"},
+  {name:"Liam O'Connor", title:"Hiring Manager"},
+  {name:"Wei Zhang", title:"Engineering Lead"},
+  {name:"Fatima Al-Sayed", title:"Head of Talent"},
+  {name:"Carlos Medeiros", title:"Recruiting Manager"},
+  {name:"Anika Bergström", title:"People Partner"},
+  {name:"Daniel Osei", title:"Hiring Manager"},
+  {name:"Grace Whitfield", title:"Talent Acquisition Lead"}
+];
+function getHM(job){ return hiringManagers[job.id % hiringManagers.length]; }
+
+function matchPercent(job){
+  if(!matchedSkills.length) return null;
+  const overlap = job.skills.filter(s=>matchedSkills.includes(s)).length;
+  return Math.round((overlap / job.skills.length) * 100);
+}
+
+// Static illustrative rates, USD base (salaries are stored in USD)
+const rates = {
+  USD:{rate:1,      symbol:"$"},
+  EUR:{rate:0.92,   symbol:"€"},
+  GBP:{rate:0.79,   symbol:"£"},
+  INR:{rate:83,     symbol:"₹"},
+  SGD:{rate:1.34,   symbol:"S$"},
+  CAD:{rate:1.36,   symbol:"C$"},
+  AED:{rate:3.67,   symbol:"د.إ"},
+  AUD:{rate:1.52,   symbol:"A$"},
+  JPY:{rate:149,    symbol:"¥"},
+  BRL:{rate:5.4,    symbol:"R$"},
+  ZAR:{rate:18.3,   symbol:"R"},
+  MXN:{rate:17.1,   symbol:"Mex$"}
+};
+
+function currency(n){
+  const code = document.getElementById('fCurrency').value;
+  const {rate, symbol} = rates[code];
+  const converted = n * rate;
+  const rounded = code === "INR" ? Math.round(converted/1000) : Math.round(converted/1000);
+  return symbol + rounded + "k";
+}
+
+function render(){
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const region = document.getElementById('fRegion').value;
+  const loc = document.getElementById('fLocation').value;
+  const arr = document.getElementById('fArrangement').value;
+  const minSalary = parseInt(document.getElementById('fSalary').value, 10);
+  const visaOnly = document.getElementById('fVisa').checked;
+
+  const filtered = jobs.filter(j=>{
+    if(q && !(j.title.toLowerCase().includes(q) || j.company.toLowerCase().includes(q) || j.skills.join(' ').toLowerCase().includes(q))) return false;
+    if(region && j.region !== region) return false;
+    if(loc && j.location !== loc) return false;
+    if(arr && j.arrangement !== arr) return false;
+    if(j.salary < minSalary) return false;
+    if(visaOnly && !j.visa) return false;
+    return true;
+  });
+
+  filtered.sort((a,b)=>{
+    const am = a.skills.filter(s=>matchedSkills.includes(s)).length;
+    const bm = b.skills.filter(s=>matchedSkills.includes(s)).length;
+    return bm - am;
+  });
+
+  const list = document.getElementById('jobList');
+  document.getElementById('resultCount').textContent = filtered.length + (filtered.length===1 ? " job" : " jobs");
+
+  if(filtered.length === 0){
+    list.innerHTML = '<div class="empty">No roles match yet. Try clearing a filter.</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(j=>{
+    const overlap = j.skills.filter(s=>matchedSkills.includes(s));
+    const pct = matchPercent(j);
+    const hm = getHM(j);
+    const badge = pct === null
+      ? `<span class="compat-hint">Upload resume for match %</span>`
+      : `<span class="compat-badge ${pct>=80?'high':pct>=50?'mid':'low'}">${pct}% match</span>`;
+    const canTailor = pct !== null && pct >= 80;
+    return `<div class="job">
+      <div class="job-main">
+        <p class="job-title">${j.title}</p>
+        <p class="job-company">${j.company} · ${j.location}</p>
+        <div class="job-meta">
+          <span class="tag remote">${j.arrangement}</span>
+          ${j.visa ? '<span class="tag visa">Visa sponsorship</span>' : ''}
+        </div>
+        <p class="job-desc">${j.desc}</p>
+        ${overlap.length ? `<div class="match">Matches ${overlap.length} skill${overlap.length>1?'s':''} on your resume: ${overlap.join(', ')}</div>` : ''}
+        <p class="hm-line">Hiring contact: ${hm.name}, ${hm.title} · <a href="https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(hm.name+' '+j.company)}" target="_blank" rel="noopener">Connect on LinkedIn</a></p>
+        <div class="job-actions">
+          <button class="btn-mini" onclick="openCoverLetter(${j.id})">Write cover letter</button>
+          <button class="btn-mini tailor" onclick="openTailor(${j.id})" ${canTailor ? '' : 'disabled title="Reaches 80% match after you upload a resume that overlaps more with this role"'}>Tailor my resume</button>
+        </div>
+      </div>
+      <div class="job-side">
+        ${badge}
+        <span class="salary">${currency(j.salary)}+</span>
+        <button class="btn-apply">Apply now</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openTailor(id){
+  const j = jobs.find(x=>x.id===id);
+  const pct = matchPercent(j);
+  if(pct === null || pct < 80) return;
+  const covered = j.skills.filter(s=>matchedSkills.includes(s));
+  const toAdd = j.skills.filter(s=>!matchedSkills.includes(s));
+  const html = `
+    <h2>Tailored resume — ${j.title}</h2>
+    <p class="modal-sub">${j.company} · ${pct}% match</p>
+    <div class="modal-body"><strong>Summary</strong>
+${matchedSkills.join(', ')} professional with hands-on experience in ${covered.join(', ') || 'the core skills this role needs'}. Track record of delivering results that map directly to what ${j.company} is hiring for in this ${j.title} role.
+
+<strong>Highlighted skills (reordered to match the job description)</strong>
+${j.skills.map(s=>'• '+s+(matchedSkills.includes(s)?' — direct match':' — add an example if you have one')).join('\n')}
+${toAdd.length ? `\n<strong>Before you apply</strong>\nConsider adding a bullet point that shows ${toAdd.join(' and ')}, since the listing calls these out and your resume doesn't yet.` : ''}
+</div>`;
+  openModal(html);
+}
+
+function openCoverLetter(id){
+  const j = jobs.find(x=>x.id===id);
+  const hm = getHM(j);
+  const overlap = j.skills.filter(s=>matchedSkills.includes(s));
+  const skillsLine = overlap.length ? overlap.join(', ') : j.skills.join(', ');
+  const html = `
+    <h2>Cover letter — ${j.title}</h2>
+    <p class="modal-sub">${j.company}</p>
+    <div class="modal-body">Dear ${hm.name},
+
+I'm writing to apply for the ${j.title} role at ${j.company}. ${j.desc.replace(/\.$/, '')}, and it lines up closely with my background in ${skillsLine}.
+
+In my recent work I've focused on ${skillsLine}, and I'd welcome the chance to bring that experience to your team as you grow in ${j.location}.
+
+I'd love to talk about how I can contribute. Thank you for your time and consideration.
+
+Warm regards,
+[Your name]
+
+—
+Prefer a warmer intro? Connect with ${hm.name} (${hm.title}) on LinkedIn before you apply: <a href="https://www.linkedin.com/search/results/people/?keywords=${encodeURIComponent(hm.name+' '+j.company)}" target="_blank" rel="noopener">search LinkedIn</a>.</div>`;
+  openModal(html);
+}
+
+function openModal(html){
+  document.getElementById('modalContent').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+function closeModal(){ document.getElementById('modalOverlay').classList.remove('show'); }
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', (e)=>{ if(e.target.id==='modalOverlay') closeModal(); });
+
+['input','change'].forEach(evt=>{
+  document.getElementById('searchInput').addEventListener(evt, render);
+  document.getElementById('fRegion').addEventListener(evt, render);
+  document.getElementById('fLocation').addEventListener(evt, render);
+  document.getElementById('fCurrency').addEventListener(evt, render);
+  document.getElementById('fArrangement').addEventListener(evt, render);
+  document.getElementById('fSalary').addEventListener(evt, render);
+  document.getElementById('fVisa').addEventListener(evt, render);
+});
+document.getElementById('searchBtn').addEventListener('click', render);
+
+const skillPool = ["Python","React","TypeScript","AWS","SQL","Leadership","Figma","PyTorch","Kubernetes","Analytics","Project Management","Communication"];
+
+document.getElementById('uploadBtn').addEventListener('click', ()=> document.getElementById('resumeInput').click());
+document.getElementById('resumeInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const box = document.getElementById('analysisBox');
+  const title = document.getElementById('analysisTitle');
+  const chips = document.getElementById('chips');
+  box.classList.add('show');
+  title.textContent = "Reading " + file.name + "…";
+  chips.innerHTML = "";
+
+  setTimeout(()=>{
+    const shuffled = [...skillPool].sort(()=>Math.random()-0.5);
+    matchedSkills = shuffled.slice(0, 5);
+    title.textContent = "Skills we found on your resume";
+    chips.innerHTML = matchedSkills.map(s=>`<span class="chip">${s}</span>`).join('');
+    render();
+  }, 900);
+});
+
+render();
+</script>
+</body>
+</html>
